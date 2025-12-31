@@ -1,0 +1,39 @@
+# Tên của workflow - hiển thị trên GitHub Actions UI
+name: CI - Build & Test
+
+# Khi nào workflow này chạy?
+on:
+  push:
+    branches: [ main, develop ]      # Chạy khi push vào main hoặc develop
+  pull_request:
+    branches: [ main, develop ]      # Chạy khi tạo PR vào main hoặc develop
+
+# Các jobs cần thực hiện
+jobs:
+  build:
+    # Chạy trên máy ảo Ubuntu mới nhất của GitHub
+    runs-on: ubuntu-latest
+    
+    # Các bước thực hiện
+    steps:
+    # Bước 1: Checkout code từ repository
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    # Bước 2: Cài đặt .NET 8 SDK
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    # Bước 3: Restore NuGet packages
+    - name: Restore dependencies
+      run: dotnet restore TicketPlatform.sln
+    
+    # Bước 4: Build solution
+    - name: Build
+      run: dotnet build TicketPlatform.sln --no-restore --configuration Release
+    
+    # Bước 5: Chạy tests (nếu có)
+    - name: Test
+      run: dotnet test TicketPlatform.sln --no-build --configuration Release --verbosity normal
